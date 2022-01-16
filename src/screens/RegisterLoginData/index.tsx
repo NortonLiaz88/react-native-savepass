@@ -36,9 +36,10 @@ export function RegisterLoginData() {
     handleSubmit,
     formState: {
       errors
-    }
+    },
+    reset,
   } = useForm({
-    resolver: yupResolver(schema)
+    resolver: yupResolver(schema),
   });
 
   async function handleRegister(formData: FormData) {
@@ -48,7 +49,16 @@ export function RegisterLoginData() {
     }
 
     const dataKey = '@savepass:logins';
-
+    try{
+      const data = await AsyncStorage.getItem(dataKey);
+      const currentData = data ? JSON.parse(data): [];
+      const dataFormatted = [...currentData, newLoginData];
+      await AsyncStorage.setItem(dataKey,JSON.stringify(dataFormatted));
+      reset();
+      navigate('Home');
+    }catch(err) {
+      console.log(err)
+    }
     // Save data on AsyncStorage and navigate to 'Home' screen
   }
 
@@ -65,10 +75,7 @@ export function RegisterLoginData() {
             testID="service-name-input"
             title="Nome do serviço"
             name="service_name"
-            error={
-              // Replace here with real content
-              'Has error ? show error message'
-            }
+            error={errors.service_name && errors.service_name.message}
             control={control}
             autoCapitalize="sentences"
             autoCorrect
@@ -77,10 +84,7 @@ export function RegisterLoginData() {
             testID="email-input"
             title="E-mail"
             name="email"
-            error={
-              // Replace here with real content
-              'Has error ? show error message'
-            }
+            error={errors.email && errors.email.message}
             control={control}
             autoCorrect={false}
             autoCapitalize="none"
@@ -90,10 +94,7 @@ export function RegisterLoginData() {
             testID="password-input"
             title="Senha"
             name="password"
-            error={
-              // Replace here with real content
-              'Has error ? show error message'
-            }
+            error={errors.password && errors.password.message}
             control={control}
             secureTextEntry
           />
